@@ -17,7 +17,6 @@ export type ICTX<T> = {
             initState: T[K][F]
             Context: React.Context<T[K][F]>
             SetContext: React.Context<Updater<T[K][F]>>
-            // SetContext: React.Context<SetStore<T, K>>
         }
     }
 }
