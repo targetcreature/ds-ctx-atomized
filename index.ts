@@ -70,7 +70,7 @@ export const useDSC = <T extends Init>(INITSTATE: T, ARGS?: ArgProps): ReturnPro
                 }
 
                 return {
-                    ...prev,
+                    ...prevField,
                     [FIELD]: newProduce
                 }
             }, {} as SetStore<T, K>)

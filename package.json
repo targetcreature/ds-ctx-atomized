@@ -1,19 +1,42 @@
 {
-  "name": "ds-ctx-atomized",
-  "version": "1.0.0",
-  "description": "dumb simple context splitter for nextjs",
-  "main": "index.js",
-  "scripts": {
-    "dev": "next"
+  "_from": "github:targetcreature/ds-ctx-atomized",
+  "_id": "ds-ctx-atomized@1.0.0",
+  "_inBundle": false,
+  "_integrity": "",
+  "_location": "/ds-ctx-atomized",
+  "_phantomChildren": {},
+  "_requested": {
+    "type": "git",
+    "raw": "github:targetcreature/ds-ctx-atomized",
+    "rawSpec": "github:targetcreature/ds-ctx-atomized",
+    "saveSpec": "github:targetcreature/ds-ctx-atomized",
+    "fetchSpec": null,
+    "gitCommittish": null
   },
-  "keywords": [],
+  "_requiredBy": [
+    "#USER",
+    "/"
+  ],
+  "_resolved": "github:targetcreature/ds-ctx-atomized#5ca503a83b31a69430e04a3948dd18fae46b4367",
+  "_spec": "github:targetcreature/ds-ctx-atomized",
+  "_where": "/home/craig/Dev/ctx-test",
   "author": "",
-  "license": "ISC",
+  "bundleDependencies": false,
   "dependencies": {
     "@types/node": "^14.0.26",
     "@types/react": "^16.9.43",
     "immer": "^7.0.7",
     "next-transpile-modules": "^4.0.0",
     "use-immer": "^0.4.1"
-  }
+  },
+  "deprecated": false,
+  "description": "dumb simple context splitter for nextjs",
+  "keywords": [],
+  "license": "ISC",
+  "main": "index.js",
+  "name": "ds-ctx-atomized",
+  "scripts": {
+    "dev": "next"
+  },
+  "version": "1.0.0"
 }

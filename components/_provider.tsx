@@ -18,12 +18,11 @@ export const _provider = <T extends Init>(CTX: ICTX<T>) => ({ children }) => {
 
 }
 
-const _subProvider = <T extends Init>(CTX: Partial<ICTX<T>>) => ({ children }) => {
+const _subProvider = <T extends Init>(CTX: ICTX<T>[0]) => ({ children }) => {
 
     const SubContext = Object.values(CTX).reduceRight((prev, val) => {
 
-        console.log(val)
-
+        const { Context, SetContext, initState } = val
         const [store, set] = useImmer(initState)
 
         return (
@@ -36,9 +35,7 @@ const _subProvider = <T extends Init>(CTX: Partial<ICTX<T>>) => ({ children }) =
 
     }, children)
 
-    return (
-        <div>{children}</div>
-    )
+    return SubContext
 }
 
 // import { useImmer } from 'use-immer'
