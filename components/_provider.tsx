@@ -4,32 +4,41 @@ import { Init } from '../_types'
 
 export const _provider = <T extends Init>(CTX: ICTX<T>) => ({ children }) => {
 
-    const Context = Object.keys(CTX).reduceRight((prevSub, KEY) => {
+    const Context = Object.values(CTX).reduceRight((prev, val) => {
 
-        const SubContext = Object.values(CTX[KEY]).reduceRight((prev, VAL) => {
-
-            const { Context, SetContext, initState } = VAL
-            const [store, set] = useImmer(initState)
-
-            return (
-                <Context.Provider value={store}>
-                    <SetContext.Provider value={set}>
-                        {prev}
-                    </SetContext.Provider>
-                </Context.Provider>
-            )
-
-        }, children)
-
+        const SubContext = _subProvider(val)
 
         return (
-            <SubContext>{prevSub}</SubContext>
+            <SubContext>{prev}</SubContext>
         )
 
     }, children)
 
     return Context
 
+}
+
+const _subProvider = <T extends Init>(CTX: Partial<ICTX<T>>) => ({ children }) => {
+
+    const SubContext = Object.values(CTX).reduceRight((prev, val) => {
+
+        console.log(val)
+
+        const [store, set] = useImmer(initState)
+
+        return (
+            <Context.Provider value={store}>
+                <SetContext.Provider value={set}>
+                    {prev}
+                </SetContext.Provider>
+            </Context.Provider>
+        )
+
+    }, children)
+
+    return (
+        <div>{children}</div>
+    )
 }
 
 // import { useImmer } from 'use-immer'
