@@ -2,19 +2,23 @@ import { setAutoFreeze } from "immer"
 import { createContext, useContext } from "react"
 import { Updater } from "use-immer"
 import { _provider } from "./components/_provider"
-import { ArgProps, Init, SetProduce, SetStore, UseStore } from "./_types"
+import { ArgProps, Init, SetProduce, SetStore, UseSetStore, UseStore } from "./_types"
 
 type ReturnProps<T> = [
     React.FC,
     UseStore<T>,
-    () => SetStore<T>
+    () => UseSetStore<T>
+    // <K extends keyof T>(key: K) => SetStore<T, K>
 ]
 
 export type ICTX<T> = {
     [K in keyof T]?: {
-        initState: T[K]
-        Context: React.Context<T[K]>
-        SetContext: React.Context<SetStore<T>>
+        [F in keyof T[K]]?: {
+            initState: T[K][F]
+            Context: React.Context<T[K][F]>
+            SetContext: React.Context<Updater<T[K][F]>>
+            // SetContext: React.Context<SetStore<T, K>>
+        }
     }
 }
 
@@ -25,40 +29,87 @@ export const useDSC = <T extends Init>(INITSTATE: T, ARGS?: ArgProps): ReturnPro
         ARGS.disableAutoFreeze && setAutoFreeze(false)
     }
 
-    const CTX: ICTX<T> = Object.entries(INITSTATE).reduce((prev, [key, init]) => ({
-        ...prev,
-        [key]: {
-            initState: init,
-            Context: createContext(init),
-            SetContext: createContext(null)
+    const CTX: ICTX<T> = Object.keys(INITSTATE).reduce((prev, key) => {
+
+        const subCTX = Object.entries(INITSTATE[key]).reduce((prev, [field, init]) => {
+            return {
+                ...prev,
+                [field]: {
+                    initState: init,
+                    Context: createContext(init),
+                    SetContext: createContext(null)
+                }
+            }
+        }, {})
+
+        return {
+            ...prev,
+            [key]: subCTX
         }
-    }), {})
+    }, {})
 
     const ContextProvider = _provider(CTX)
 
 
-    const useStore: UseStore<T> = <K extends keyof T>(key: K) => {
-        const value = useContext(CTX[key].Context)
+    const useStore: UseStore<T> = <K extends keyof T>(key: K) => <F extends keyof T[K]>(field: F) => {
+        const value = useContext(CTX[key][field].Context)
         return value
     }
 
-    const setStore = (): SetStore<T> =>
-        Object.entries(CTX).reduce((prev, [key, { SetContext }]) => {
+    const setStore = () =>
+        Object.keys(CTX).reduce(<K extends keyof T>(prev, KEY: K) => {
 
-            type K = typeof key
+            const Store = Object.keys(CTX[KEY]).reduce(<F extends keyof T[K]>(prevField, FIELD: F) => {
 
-            const produce: Updater<T[K]> = useContext(SetContext)
-            const newProduce: SetProduce<T, K> = (cb) => {
-                produce((draft) => {
-                    return typeof cb === "function" ? cb(draft, INITSTATE[key]) : cb
-                })
-            }
+                const { SetContext } = CTX[KEY][FIELD]
+
+                const produce: Updater<T[K][F]> = useContext(SetContext)
+                const newProduce: SetProduce<T, K, F> = (cb) => {
+                    produce((draft) => {
+                        return typeof cb === "function" ? cb(draft, INITSTATE[KEY][FIELD]) : cb
+                    })
+                }
+
+                return {
+                    ...prev,
+                    [FIELD]: newProduce
+                }
+            }, {} as SetStore<T, K>)
 
             return {
                 ...prev,
-                [key]: newProduce
+                [KEY]: Store
             }
-        }, {} as SetStore<T>)
+        }, {} as UseSetStore<T>)
+
+    // const setStore = (): UseStore<T> =>
+    //     Object.keys(CTX).reduce(<K extends keyof T>(prevKey: SetStore<T, K>, KEY: K) => {
+
+    //         const Stores = Object.keys(CTX[KEY]).reduce(<F extends keyof T[K]>(prevField: SetStore<T, K>[F], FIELD: F) => {
+
+    //             const { SetContext } = CTX[KEY][FIELD]
+
+    //             const produce: Updater<T[K][F]> = useContext(SetContext)
+
+    //             const newProduce: SetProduce<T, K, F> = (cb) => {
+    //                 produce((draft) => {
+    //                     return typeof cb === "function" ? cb(draft, INITSTATE[KEY][FIELD]) : cb
+    //                 })
+    //             }
+
+    //             return {
+    //                 ...prevField,
+    //                 [FIELD]: newProduce
+    //             }
+
+    //         }, {})
+
+    //         return {
+    //             ...prevKey,
+    //             [KEY]: Stores
+    //         }
+
+    //     }, {} as UseSetStore<T>)
 
     return [
         ContextProvider,
