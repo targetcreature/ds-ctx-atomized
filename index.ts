@@ -8,7 +8,6 @@ type ReturnProps<T> = [
     React.FC,
     UseStore<T>,
     () => UseSetStore<T>
-    // <K extends keyof T>(key: K) => SetStore<T, K>
 ]
 
 export type ICTX<T> = {
