@@ -1,5 +1,5 @@
 {
-  "name": "ds-ctx",
+  "name": "ds-ctx-atomized",
   "version": "1.0.0",
   "description": "dumb simple context splitter for nextjs",
   "main": "index.js",
