@@ -49,7 +49,7 @@ export const useDSC = <T extends Init>(INITSTATE: T, ARGS?: ArgProps): ReturnPro
     const ContextProvider = _provider(CTX)
 
 
-    const useStore: UseStore<T> = <K extends keyof T>(key: K) => <F extends keyof T[K]>(field: F) => {
+    const useStore: UseStore<T> = (key) => (field) => {
         const value = useContext(CTX[key][field].Context)
         return value
     }
@@ -79,35 +79,6 @@ export const useDSC = <T extends Init>(INITSTATE: T, ARGS?: ArgProps): ReturnPro
                 [KEY]: Store
             }
         }, {} as UseSetStore<T>)
-
-    // const setStore = (): UseStore<T> =>
-    //     Object.keys(CTX).reduce(<K extends keyof T>(prevKey: SetStore<T, K>, KEY: K) => {
-
-    //         const Stores = Object.keys(CTX[KEY]).reduce(<F extends keyof T[K]>(prevField: SetStore<T, K>[F], FIELD: F) => {
-
-    //             const { SetContext } = CTX[KEY][FIELD]
-
-    //             const produce: Updater<T[K][F]> = useContext(SetContext)
-
-    //             const newProduce: SetProduce<T, K, F> = (cb) => {
-    //                 produce((draft) => {
-    //                     return typeof cb === "function" ? cb(draft, INITSTATE[KEY][FIELD]) : cb
-    //                 })
-    //             }
-
-    //             return {
-    //                 ...prevField,
-    //                 [FIELD]: newProduce
-    //             }
-
-    //         }, {})
-
-    //         return {
-    //             ...prevKey,
-    //             [KEY]: Stores
-    //         }
-
-    //     }, {} as UseSetStore<T>)
 
     return [
         ContextProvider,
