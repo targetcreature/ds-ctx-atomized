@@ -7,8 +7,8 @@
   "_phantomChildren": {},
   "_requested": {
     "type": "git",
-    "raw": "targetcreature/ds-ctx-atomized",
-    "rawSpec": "targetcreature/ds-ctx-atomized",
+    "raw": "github:targetcreature/ds-ctx-atomized",
+    "rawSpec": "github:targetcreature/ds-ctx-atomized",
     "saveSpec": "github:targetcreature/ds-ctx-atomized",
     "fetchSpec": null,
     "gitCommittish": null
@@ -17,9 +17,9 @@
     "#USER",
     "/"
   ],
-  "_resolved": "github:targetcreature/ds-ctx-atomized#ff13022a7b2b470f65dc7c3c950cf55cbc1fc92a",
-  "_spec": "targetcreature/ds-ctx-atomized",
-  "_where": "/home/craig/Dev/ds-sfx",
+  "_resolved": "github:targetcreature/ds-ctx-atomized#c3ee182d41935ce8adc30adbd1e161f6d0b527cb",
+  "_spec": "github:targetcreature/ds-ctx-atomized",
+  "_where": "/home/craig/Dev/ctx-test",
   "author": "",
   "bundleDependencies": false,
   "dependencies": {

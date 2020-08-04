@@ -2,7 +2,7 @@ import { setAutoFreeze } from "immer"
 import { createContext, useContext } from "react"
 import { Updater } from "use-immer"
 import { _provider } from "./components/_provider"
-import { ArgProps, Init, SetProduce, SetStore, UseSetStore, UseStore } from "./_types"
+import { ArgProps, Init, SetProduce, SetProduceSingle, SetStore, UseSetStore, UseStore } from "./_types"
 
 type ReturnProps<T> = [
     React.FC,
@@ -20,6 +20,11 @@ export type ICTX<T> = {
     }
 }
 
+const isObject = (variable: any) => {
+    console.log(variable)
+    return Object.prototype.toString.call(variable) === '[object Object]'
+}
+
 
 export const useDSC = <T extends Init>(INITSTATE: T, ARGS?: ArgProps): ReturnProps<T> => {
 
@@ -27,18 +32,27 @@ export const useDSC = <T extends Init>(INITSTATE: T, ARGS?: ArgProps): ReturnPro
         ARGS.disableAutoFreeze && setAutoFreeze(false)
     }
 
-    const CTX: ICTX<T> = Object.keys(INITSTATE).reduce((prev, key) => {
+    const CTX: ICTX<T> = Object.entries(INITSTATE).reduce((prev, [key, val]) => {
 
-        const subCTX = Object.entries(INITSTATE[key]).reduce((prev, [field, init]) => {
-            return {
-                ...prev,
-                [field]: {
-                    initState: init,
-                    Context: createContext(init),
+        const subCTX = isObject(val) ?
+            Object.entries(val).reduce((prev, [field, init]) => {
+                return {
+                    ...prev,
+                    [field]: {
+                        initState: init,
+                        Context: createContext(init),
+                        SetContext: createContext(null)
+                    }
+                }
+            }, {})
+            :
+            ({
+                [key]: {
+                    initState: val,
+                    Context: createContext(val),
                     SetContext: createContext(null)
                 }
-            }
-        }, {})
+            })
 
         return {
             ...prev,
@@ -46,18 +60,16 @@ export const useDSC = <T extends Init>(INITSTATE: T, ARGS?: ArgProps): ReturnPro
         }
     }, {})
 
-    const ContextProvider = _provider(CTX)
+    const ContextProvider: React.FC = _provider(CTX)
 
-
-    const useStore: UseStore<T> = (key, field?) => {
-        const index = Object.keys(CTX[key]).length > 1 ? field : key
-        return useContext(CTX[key][index].Context)
+    const useStore: UseStore<T> = (key, field = null) => {
+        return useContext(CTX[key][field || key].Context)
     }
 
     const setStore = () =>
         Object.keys(CTX).reduce(<K extends keyof T>(prev, KEY: K) => {
 
-            const Store = Object.keys(CTX[KEY]).reduce(<F extends keyof T[K]>(prevField, FIELD: F) => {
+            const nestedStore = () => Object.keys(CTX[KEY]).reduce(<F extends keyof T[K]>(prevField, FIELD: F) => {
 
                 const { SetContext } = CTX[KEY][FIELD]
 
@@ -74,11 +86,29 @@ export const useDSC = <T extends Init>(INITSTATE: T, ARGS?: ArgProps): ReturnPro
                 }
             }, {} as SetStore<T, K>)
 
+            const singleStore = (): SetProduceSingle<T, K> => {
+
+                const { SetContext } = CTX[KEY][KEY]
+                const produce: Updater<T[K][K]> = useContext(SetContext)
+                const newProduce: SetProduceSingle<T, K> = (cb) => {
+                    produce((draft) => {
+                        return typeof cb === "function" ? cb(draft, INITSTATE[KEY]) : cb
+                    })
+                }
+                return newProduce
+            }
+
+            const Store = isObject(INITSTATE[KEY]) ? nestedStore() : singleStore()
+
+
             return {
                 ...prev,
                 [KEY]: Store
             }
+
         }, {} as UseSetStore<T>)
+
+
 
     return [
         ContextProvider,
